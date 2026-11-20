@@ -1,15 +1,21 @@
-name: Binance Baglanti Testi
+name: Kripto Takip Paneli
 
 on:
+  schedule:
+    - cron: "17 */4 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: kripto-takip
+  cancel-in-progress: false
+
 jobs:
-  test:
+  update:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
 
     steps:
       - name: Dosyalari indir
@@ -20,5 +26,5 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Binance Testnet baglantisini kontrol et
+      - name: Coin tablosunu guncelle
         run: python bot.py
