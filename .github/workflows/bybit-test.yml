@@ -1,0 +1,24 @@
+name: Bybit Baglanti Testi
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Dosyalari indir
+        uses: actions/checkout@v4
+
+      - name: Python hazirla
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Bybit mum verisini kontrol et
+        run: python bybit_test.py
