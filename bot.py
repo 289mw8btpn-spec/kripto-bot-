@@ -73,3 +73,63 @@ except HTTPError as error:
     print("HTTP hata kodu:", error.code)
     print(error.read().decode("utf-8", errors="replace")[:1500])
     raise
+
+from html import escape
+from pathlib import Path
+
+cards = []
+
+for coin in coins:
+    name = escape(str(coin.get("name", "")))
+    symbol = escape(str(coin.get("symbol", "")).upper())
+    price = number(coin.get("current_price"), 6)
+    change_value = coin.get("price_change_percentage_24h")
+    change = number(change_value)
+    color = "#4ade80" if (change_value or 0) >= 0 else "#f87171"
+
+    cards.append(
+        f'<article><strong>{name} ({symbol})</strong>'
+        f'<p>{price} USD</p>'
+        f'<span style="color:{color}">24 saat: %{change}</span>'
+        f'</article>'
+    )
+
+page = """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Kripto Takip</title>
+<style>
+body{background:#0b1220;color:#e5e7eb;font-family:system-ui;
+margin:0;padding:20px}
+h1{font-size:26px}
+.note{color:#a6b3c8;font-size:14px;line-height:1.6}
+article{background:#172237;border-radius:16px;
+padding:18px;margin:12px 0}
+article p{font-size:21px;margin:12px 0}
+input{box-sizing:border-box;width:100%;padding:15px;
+border-radius:12px;border:1px solid #44516a;
+background:#172237;color:white;font-size:16px}
+</style>
+</head>
+<body>
+<h1>Kripto Takip</h1>
+<p class="note">Yalnızca piyasa verisi. Alım-satım yapılmaz.<br>
+Son güncelleme: UPDATE_TIME</p>
+<input placeholder="Coin ara..."
+oninput="document.querySelectorAll('article').forEach(
+el => el.hidden = !el.textContent.toLowerCase().includes(
+this.value.toLowerCase()))">
+<main>COIN_CARDS</main>
+<p class="note">Henüz teknik analiz, sanal işlem ve Telegram yoktur.</p>
+</body>
+</html>"""
+
+page = page.replace("UPDATE_TIME", escape(updated))
+page = page.replace("COIN_CARDS", "".join(cards))
+
+Path("public").mkdir(exist_ok=True)
+Path("public/index.html").write_text(page, encoding="utf-8")
+print("Mobil panel dosyasi hazirlandi.")
