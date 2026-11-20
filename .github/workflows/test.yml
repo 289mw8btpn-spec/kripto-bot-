@@ -7,15 +7,21 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: kripto-takip
+  group: kripto-panel-yayin
   cancel-in-progress: false
 
 jobs:
-  update:
+  publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Dosyalari indir
@@ -26,5 +32,17 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Coin tablosunu guncelle
+      - name: Verileri al ve mobil paneli olustur
         run: python bot.py
+
+      - name: Pages ayarlarini hazirla
+        uses: actions/configure-pages@v5
+
+      - name: Yalnizca panel klasorunu yukle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Paneli yayinla
+        id: deployment
+        uses: actions/deploy-pages@v4
